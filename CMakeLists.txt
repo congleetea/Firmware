@@ -104,17 +104,23 @@
 cmake_minimum_required(VERSION 3.2 FATAL_ERROR)
 
 set(PX4_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
-set(PX4_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+set(PX4_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}") # target 编译目录
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PX4_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PX4_BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PX4_BINARY_DIR})
 
+# 这个变量用来定义自己的 cmake 模块所在的路径。如果你的工程比较复杂,有可能会自己
+# 编写一些 cmake 模块,这些 cmake 模块是随你的工程发布的,为了让 cmake 在处理
+# CMakeLists.txt 时找到这些模块,你需要通过 SET 指令,将自己的 cmake 模块路径设
+# 置一下。
+# 这时候你就可以通过 INCLUDE 指令来调用自己的模块了。
 list(APPEND CMAKE_MODULE_PATH ${PX4_SOURCE_DIR}/cmake)
 
 #=============================================================================
 # git
 #
+# 载入的内容将在处理到 INCLUDE 语句是直接执行
 include(common/px4_git)
 
 execute_process(
@@ -124,6 +130,7 @@ execute_process(
 	WORKING_DIRECTORY ${PX4_SOURCE_DIR}
 	)
 
+# 
 px4_add_git_submodule(TARGET git_ecl PATH "src/lib/ecl")
 px4_add_git_submodule(TARGET git_matrix PATH "src/lib/matrix")
 
@@ -135,10 +142,11 @@ define_property(GLOBAL PROPERTY PX4_LIBRARIES
 #=============================================================================
 # configuration
 #
-
+MESSAGE(STATUS ">>>>>>>>>> init CONFIG: " ${CONFIG})
 set(CONFIG "posix_sitl_default" CACHE STRING "desired configuration")
-
+MESSAGE(STATUS ">>>>>>>>>> now CONFIG1: " ${CONFIG})
 string(REPLACE "_" ";" config_args ${CONFIG})
+MESSAGE(STATUS ">>>>>>>>>> now CONFIG2: " ${CONFIG})
 list(GET config_args 0 OS)
 list(GET config_args 1 BOARD)
 list(GET config_args 2 LABEL)
